@@ -1,0 +1,1 @@
+{"level":"debug","datetime":"2025-07-24T00:28:10.968Z","message":"generate authcode response","data":"https://api.fyers.in/api/v2generate-authcode?client_id=7FLGP9KZ2H-100;&redirect_uri=http://localhost:5000/fyers/callback&response_type=code&state=sample_state","functionName":"generateAuthCode"}
