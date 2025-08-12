@@ -8,6 +8,8 @@ router.post("/", async (req, res) => {
   const { email, password } = req.body;
 
   try {
+        console.log("clicked loginin btn");
+
     if (!email || !password) {
       return res
         .status(400)

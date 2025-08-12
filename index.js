@@ -9,6 +9,8 @@ const signinRoute = require("./src/routes/signin.route");
 const userData = require("./src/routes/userData.route");
 const stockData = require('./src/routes/StockData.route');
 const holdings = require("./src/routes/holdings.route");
+const chartData = require("./src/routes/chartData.route");
+
 
 
 const app = express();
@@ -33,7 +35,7 @@ app.use("/signin", signinRoute);
 app.use("/userData", userData);
 app.use("/stockData", stockData);
 app.use("/holdings", holdings);
-
+app.use("/chartData", chartData);
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
