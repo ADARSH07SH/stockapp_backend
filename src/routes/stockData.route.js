@@ -4,6 +4,7 @@ const Ticker = require("../models/ticker.model");
 const UserPortfolio = require("../models/userPortfolio.model");
 const { getStockData } = require("../services/fyers/fyers.service");
 
+
 router.get("/:isin", async (req, res) => {
   const { isin } = req.params;
   console.log("Stock request from App Frontend:", isin);
@@ -17,35 +18,41 @@ router.get("/:isin", async (req, res) => {
     }
 
     const fyersResponse = await getStockData(ticker.symbol);
+    console.log("FYERS response:", fyersResponse.d);
 
     if (!fyersResponse?.d?.[0]?.v) {
       console.error("Invalid response from FYERS:", fyersResponse);
       return res.status(500).json({ error: "Invalid response from FYERS" });
     }
 
-    const d = fyersResponse.d[0].v;
+    const fyersData = fyersResponse.d[0].v;
+    const fyersSymbol = fyersResponse.d[0].n;
+
 
     const mappedData = {
-      lastPrice: d.lp,
-      openPrice: d.open_price,
-      highPrice: d.high_price,
-      lowPrice: d.low_price,
-      prevClosePrice: d.prev_close_price,
-      volume: d.volume,
-      averageTradePrice: d.atp,
-      ask: d.ask,
-      bid: d.bid,
-      change: d.ch,
-      changePercent: d.chp,
-      fyToken: d.fyToken,
-      tradeTimestamp: d.tt,
-      description: d.description,
-      shortName: d.short_name,
-      spread: d.spread,
+      lastPrice: fyersData.lp,
+      openPrice: fyersData.open_price,
+      highPrice: fyersData.high_price,
+      lowPrice: fyersData.low_price,
+      prevClosePrice: fyersData.prev_close_price,
+      volume: fyersData.volume,
+      averageTradePrice: fyersData.atp,
+      ask: fyersData.ask,
+      bid: fyersData.bid,
+      change: fyersData.ch,
+      changePercent: fyersData.chp,
+      fyToken: fyersData.fyToken,
+      tradeTimestamp: fyersData.tt,
+      description: fyersData.description,
+      shortName: fyersData.short_name,
+      spread: fyersData.spread,
+      fyersSymbol, 
       lastFetchedAt: new Date(),
     };
 
+ 
     await Ticker.updateOne({ isin }, { $set: mappedData });
+
 
     const responseData = {
       currentPrice: mappedData.lastPrice,
@@ -63,6 +70,7 @@ router.get("/:isin", async (req, res) => {
       isin,
       symbol: ticker.symbol,
       name: ticker.name,
+      fyersSymbol: mappedData.fyersSymbol,
     };
 
     res.json(responseData);
@@ -71,6 +79,7 @@ router.get("/:isin", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 router.get("/search/:query", async (req, res) => {
   const { query } = req.params;
@@ -97,9 +106,11 @@ router.get("/search/:query", async (req, res) => {
   }
 });
 
+
 router.get("/holding/:username/:isin", async (req, res) => {
   const { username, isin } = req.params;
-console.log(username+isin)
+  console.log(username + " " + isin);
+
   try {
     const user = await UserPortfolio.findOne({ username });
     if (!user) {
