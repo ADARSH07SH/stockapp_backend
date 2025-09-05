@@ -10,6 +10,7 @@ const stockData = require("./src/routes/stockData.route");
 const holdings = require("./src/routes/holdings.route");
 const chartData = require("./src/routes/chartData.route");
 const changePassword = require('./src/routes/changePassword.route');
+const wakeupRoute = require("./src/routes/wakeup.route");  
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -30,7 +31,7 @@ app.use("/stockData", stockData);
 app.use("/holdings", holdings);
 app.use("/chartData", chartData);
 app.use("/changePassword", changePassword);
-
+app.use("/wakeupserver", wakeupRoute);
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
