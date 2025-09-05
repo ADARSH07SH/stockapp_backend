@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= title || "Trending News Management" %></title>
+  <style>
+    body { font-family: Arial; max-width: 900px; margin: auto; padding: 20px; }
+    h1,h2 { color: #1f2937; }
+    textarea, button { padding: 8px; margin: 8px 0; width: 100%; font-size: 1em; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    .btn { padding: 6px 12px; margin: 2px; cursor: pointer; }
+    button.add-btn { background-color: #007bff; color: white; border: none; }
+    button.delete-btn { background-color: #dc3545; color: white; border: none; }
+    pre { background-color: #f9f9f9; padding: 10px; overflow-x: auto; white-space: pre-wrap; }
+  </style>
+  <script>
+    async function fetchTrending() {
+      const res = await fetch('/trending');
+      const data = await res.json();
+      const tbody = document.getElementById('trendingBody');
+      tbody.innerHTML = '';
+      if (data.success && Array.isArray(data.news) && data.news.length) {
+        data.news.forEach(news => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${escapeHtml(news.title)}</td>
+            <td><a href="${escapeHtml(news.url)}" target="_blank" rel="noopener noreferrer">Open Link</a></td>
+            <td><button class="btn delete-btn" onclick="removeNews('${news._id}')">Remove</button></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } else {
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No trending news found.</td></tr>';
+      }
+    }
+
+    function escapeHtml(text){ return text ? text.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])) : ''; }
+
+    async function addNews() {
+      const input = document.getElementById('bulkNews').value.trim();
+      if(!input) { alert("Enter JSON array"); return; }
+      try {
+        const newsArray = JSON.parse(input);
+        if(!Array.isArray(newsArray)) { alert("Input must be a JSON array"); return; }
+        const res = await fetch('/trending/add', {
+          method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({news: newsArray})
+        });
+        const result = await res.json();
+        alert(result.message || "News added successfully");
+        document.getElementById('bulkNews').value = '';
+        fetchTrending();
+      } catch(err){
+        alert("Invalid JSON! Example:\n[\n  {\"title\":\"Sensex major gains today\",\"url\":\"https://example.com/news1\"},\n  {\"title\":\"Adani Ports sees buying interest\",\"url\":\"https://example.com/news2\"}\n]");
+      }
+    }
+
+    async function removeNews(id){ if(!confirm("Remove this news?")) return; await fetch('/trending/remove',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); fetchTrending(); }
+    async function removeAllNews(){ if(!confirm("Delete ALL news?")) return; const res = await fetch('/trending'); const data = await res.json(); if(data.success){ for(const news of data.news){ await fetch('/trending/remove',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:news._id})}); } fetchTrending(); } }
+    window.onload = fetchTrending;
+  </script>
+</head>
+<body>
+
+<h1>Trending News Management</h1>
+
+<h2>Bulk Add Trending News</h2>
+<p>Paste a JSON array in the following format:</p>
+<pre>
+[
+  {"title":"Major Nifty/Sensex update today with top companies","url":"https://example.com/news1"},
+  {"title":"Bank Nifty shows volatility with key banking stocks","url":"https://example.com/news2"},
+  {"title":"Top company results and IPO updates","url":"https://example.com/news3"},
+  {"title":"Other Indian market news or global finance news (10%)","url":"https://example.com/news4"}
+]
+</pre>
+
+<textarea id="bulkNews" rows="15" placeholder="Paste JSON array with title and url here..."></textarea><br/>
+<button class="add-btn" onclick="addNews()">Add All</button>
+<button class="delete-btn" onclick="removeAllNews()">Delete All</button>
+
+<h2>Current Trending News</h2>
+<table>
+  <thead><tr><th>Title</th><th>URL</th><th>Action</th></tr></thead>
+  <tbody id="trendingBody"><tr><td colspan="3">Loading news...</td></tr></tbody>
+</table>
+
+</body>
+</html>
