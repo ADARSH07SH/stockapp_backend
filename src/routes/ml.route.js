@@ -1,5 +1,5 @@
-import express from "express";
-import MLStrategy from "../models/MLStrategy.js";
+const express = require("express");
+const MLStrategy = require("../models/MLStrategy.model");
 
 const router = express.Router();
 
@@ -31,8 +31,9 @@ router.post("/ml-strategy", async (req, res) => {
 
 router.post("/user-strategy", async (req, res) => {
   const { symbol, text } = req.body;
-  if (!symbol || !text)
+  if (!symbol || !text) {
     return res.status(400).json({ error: "Symbol and text are required" });
+  }
 
   const strategy = await MLStrategy.findOneAndUpdate(
     { symbol },
@@ -43,4 +44,4 @@ router.post("/user-strategy", async (req, res) => {
   res.json(strategy);
 });
 
-export default router;
+module.exports = router;

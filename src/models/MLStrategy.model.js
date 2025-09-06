@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const MLStrategySchema = new mongoose.Schema(
   {
@@ -10,4 +10,4 @@ const MLStrategySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("MLStrategy", MLStrategySchema);
+module.exports = mongoose.model("MLStrategy", MLStrategySchema);
