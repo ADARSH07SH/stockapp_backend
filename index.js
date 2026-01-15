@@ -14,7 +14,7 @@ const changePassword = require("./src/routes/changePassword.route");
 const wakeupRoute = require("./src/routes/wakeup.route");
 const trendingRoute = require("./src/routes/trending.route");
 const mlRoutes =require("./src/routes/ml.route")
-const ytRoutes=require("./src/routes/yt.route")
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -42,7 +42,7 @@ app.use("/changePassword", changePassword);
 app.use("/wakeupserver", wakeupRoute);
 app.use("/trending", trendingRoute);
 app.use("/ml", mlRoutes);
-app.use("/yt", ytRoutes);
+
 
 
 app.get("/admin/:password", (req, res) => {
